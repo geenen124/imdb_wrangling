@@ -142,4 +142,6 @@ if __name__ == "__main__":
     all_edges_df = pd.concat([full_rate_df, edge_df])
 
     # Persist the data
+    v_df.to_csv(DATA_DIR / "final_vertices.csv", index=False)
+    all_edges_df.to_csv(DATA_DIR / "final_edges.csv", index=False)
 
