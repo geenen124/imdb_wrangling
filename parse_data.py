@@ -121,18 +121,25 @@ if __name__ == "__main__":
     # now that we have the updated ids - we can load in the ratings from the first dataset
     ratings_df = pd.read_csv(FIRST_DSET_DIR / "ratings.csv")
 
-    l_rate_df = ratings_df.merge(v_df[["movie_id", "_key"]], how="left", left_on="item_id", right_on="movie_id")
-    l_rate_df["_from"] = l_rate_df["_key"]
-    l_rate_df = l_rate_df[["user_id", "Rating", "Timestamp", "_from"]]
-    full_rate_df = pd.merge(users_df[["user_id", "_key"]], l_rate_df, on="user_id")
-
-
     # And join the ratings to the movies + users
-    # next join these to the users
-    # Replace the _from and _to key fields with the updated ids
+    l_rate_df = ratings_df.merge(v_df[["movie_id", "_key"]], how="left", left_on="item_id", right_on="movie_id")
+    l_rate_df["_to"] = l_rate_df["_key"]
+    l_rate_df = l_rate_df[["user_id", "Rating", "Timestamp", "_to"]]
+    full_rate_df = pd.merge(users_df[["user_id", "_key"]], l_rate_df, on="user_id")
+    full_rate_df["_from"] = full_rate_df["_key"]
+    full_rate_df = full_rate_df[["_from", "_to", "Rating", "Timestamp"]]
+    full_rate_df["type"] = "Rating"
+    full_rate_df["$label"] = "RATED"
 
-    # Then add these ratings to the next ratings dataset
+    # Then add these ratings to the full edges dataset
+    with open(SECOND_DSET_DIR / "imdb_edges.data.json", "r") as raw_jsonl:
+        e_jsonl = list(raw_jsonl)
 
-    # TODO: Add edges to the various genres
+    parsed_edges = [parse_jsonl_line(j) for j in e_jsonl]
+
+    edge_df = pd.DataFrame(parsed_edges)
+
+    all_edges_df = pd.concat([full_rate_df, edge_df])
+
     # Persist the data
 
