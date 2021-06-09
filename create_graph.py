@@ -82,8 +82,7 @@ if __name__ == "__main__":
     edges_col = db.createCollection(name="imdb_edges", className="Edges")
     ratings_col = db.createCollection(name="Ratings", className="Edges")
 
-    g = db.createGraph("IMDBGraph")
-
+    g = db.createGraph("IMDBGraph", replicationFactor = 3)
     # Upload the vertices first
     vertex_df = pd.read_csv(DATA_DIR / "final_vertices.csv")
 
