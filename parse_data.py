@@ -43,7 +43,6 @@ if __name__ == "__main__":
     first_m_df = first_m_df.drop(columns=genres)
 
     # Join the two together
-    # TODO: This is broken!! Can't just merge on the movie title, as these aren't unique
     in_common = pd.merge(first_m_df, second_v_df, left_on=" movie title ", right_on="title")
 
     # first replace descriptions if they're useful
@@ -81,8 +80,6 @@ if __name__ == "__main__":
     in_common["studio"] = in_common[["studio", " studio "]].bfill(axis=1).iloc[:, 0]
     in_common["IMDb URL"] = in_common[" IMDb URL "]
 
-    # TODO: Figure out something useful for release dates - python/pandas parsers really don't like the (non-unix?) timestamp from the larger set
-
     # drop remaining columns
     in_common.drop(columns=[" tagline", " movie title ", " description", " studio ", " IMDb URL ", "genres_x", "genres_y", " unknown ", " release date ", " video release date "])
 
@@ -100,7 +97,7 @@ if __name__ == "__main__":
     m_remainder.drop(columns=[" tagline", " movie title ", " description", " studio ", " IMDb URL ", " unknown ", " release date ", " video release date "])
 
     # we also need to create unique keys for each of the movies that weren't linked to the bigger dataset
-    start = len(second_v_df)
+    start = second_v_df[second_v_df._key.apply(lambda x: x.isnumeric())]._key.apply(int).max() + 1
     end = start + len(m_remainder)
     m_remainder["_key"] = list(range(start, end))
 
@@ -131,6 +128,9 @@ if __name__ == "__main__":
     full_rate_df["type"] = "Rating"
     full_rate_df["$label"] = "RATED"
 
+    # Now we can drop the duplicate movie_id rows!
+    v_df = v_df.drop_duplicates(subset="_key")
+
     # Then add these ratings to the full edges dataset
     with open(SECOND_DSET_DIR / "imdb_edges.data.json", "r") as raw_jsonl:
         e_jsonl = list(raw_jsonl)
@@ -143,5 +143,6 @@ if __name__ == "__main__":
 
     # Persist the data
     v_df.to_csv(DATA_DIR / "final_vertices.csv", index=False)
+    users_df.to_csv(DATA_DIR / "final_users.csv", index=False)
     all_edges_df.to_csv(DATA_DIR / "final_edges.csv", index=False)
 
