@@ -137,8 +137,8 @@ if __name__ == "__main__":
             doc["_to"] = "imdb_vertices/" + str(edge["_to"])
             doc["$label"] = str(edge["$label"])
             doc["type"] = str(edge["type"])
-            doc["rating"] = float(edge["Rating"])
-            doc["timestamp"] = str(edge["Timestamp"])
+            doc["rating"] = edge["Rating"]
+            doc["timestamp"] = edge["Timestamp"]
             doc.save()
 
     # Should be done with imports now!
